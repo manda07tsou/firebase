@@ -1,28 +1,28 @@
-import { signInWithEmailAndPassword } from "firebase/auth"
 import { useState } from "react"
 import { Button } from "~/components/ui/button"
 import { Field, FieldGroup } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
+import {createUserWithEmailAndPassword, sendEmailVerification, type User } from "firebase/auth";
 import { auth } from "~/config/firebase"
+import { toast } from "sonner"
 
-export function LoginForm(){
+export function SignUpForm(){
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
 
-    const handleLogin = () => {
-        signInWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-                // Signed in 
-                const user = userCredential.user;
-                console.log(userCredential)
-                // ...
+    const handleSignUp = () => {
+        createUserWithEmailAndPassword(auth, email, password)
+            .then(userCredential => {
+                toast.success('Votre compte a été créé avec succès.')
+                sendEmailVerification(auth.currentUser as User)
+                .then(() => {
+                    toast.success('Une email de verification est envoyer')
+                })
             })
-            .catch((error) => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                console.log(error.message)
-            });
+            .catch(error => {
+                toast.error(error.message)
+            })
     }
 
     return <>
@@ -50,7 +50,7 @@ export function LoginForm(){
                     </FieldGroup>
                     <Field>
                         <Button
-                            onClick={handleLogin}
+                            onClick={handleSignUp}
                         >Enregistrer
                         </Button>
                     </Field>
